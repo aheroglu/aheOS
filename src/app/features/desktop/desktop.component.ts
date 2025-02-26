@@ -35,6 +35,19 @@ interface Window {
   url?: string;
 }
 
+interface HelpWindow {
+  id: string;
+  title: string;
+  icon: string;
+  content: string;
+  width: number;
+  height: number;
+  isResizable: boolean;
+  isMaximized: boolean;
+  position: { x: number; y: number };
+  zIndex: number;
+}
+
 @Component({
   standalone: true,
   imports: [
@@ -110,12 +123,35 @@ interface Window {
         </app-window>
       </ng-container>
 
+      <ng-container
+        *ngFor="let helpWindow of openHelpWindows; trackBy: trackHelpWindow"
+      >
+        <app-window
+          #helpWindowComponent
+          [title]="helpWindow.title"
+          [icon]="helpWindow.icon"
+          [width]="helpWindow.width"
+          [height]="helpWindow.height"
+          [x]="helpWindow.position.x"
+          [y]="helpWindow.position.y"
+          [zIndex]="helpWindow.zIndex"
+          [isMaximized]="helpWindow.isMaximized"
+          (close)="closeHelpWindow(helpWindow.id)"
+          (minimize)="minimizeHelpWindow(helpWindow.id)"
+          (maximize)="maximizeHelpWindow(helpWindow.id)"
+          (positionChange)="updateHelpWindowPosition(helpWindow.id, $event)"
+          (click)="focusHelpWindow(helpWindow.id)"
+        >
+          <div class="h-full" [innerHTML]="helpWindow.content"></div>
+        </app-window>
+      </ng-container>
+
       <app-start-menu
         *ngIf="isStartMenuOpen"
         (menuClose)="closeStartMenu()"
         (shutDown)="onShutDown()"
-        (menuItemClick)="onStartMenuItemClick($event)"
-      />
+        (onStartMenuItemClick)="onStartMenuItemClick($event)"
+      ></app-start-menu>
 
       <app-taskbar
         class="absolute bottom-0 left-0 right-0"
@@ -221,6 +257,7 @@ export class DesktopComponent {
   ];
 
   activeWindows: Window[] = [];
+  openHelpWindows: HelpWindow[] = [];
   isStartMenuOpen = false;
 
   @ViewChildren('windowComponent')
@@ -241,6 +278,10 @@ export class DesktopComponent {
 
   trackWindow(index: number, window: Window): number {
     return window.id;
+  }
+
+  trackHelpWindow(index: number, helpWindow: HelpWindow): string {
+    return helpWindow.id;
   }
 
   onDesktopClick(event: MouseEvent) {
@@ -396,6 +437,8 @@ export class DesktopComponent {
     this.closeStartMenu();
     if (item.type === 'shutdown') {
       this.router.navigate(['/shutdown']);
+    } else if (item.type === 'help') {
+      this.openHelpWindow();
     } else if (item.type) {
       this.openApplication(item);
     }
@@ -432,5 +475,90 @@ export class DesktopComponent {
 
   onShutDown() {
     this.router.navigate(['/shutdown']);
+  }
+
+  openHelpWindow() {
+    if (this.openHelpWindows.length > 0) {
+      return;
+    }
+
+    const helpWindow: HelpWindow = {
+      id: 'help',
+      title: 'Help',
+      icon: '/icons/help.png',
+      content: `
+        <div class="p-4">
+          <h2 class="text-xl font-bold mb-4">Welcome to aheOS Help</h2>
+          
+          <div class="mb-4">
+            <h3 class="font-bold mb-2 text-sm">Getting Started</h3>
+            <ul class="list-disc pl-4 text-[12px]">
+              <li>Click the Start button to access programs and settings</li>
+              <li>Use the taskbar to switch between open windows</li>
+              <li>Right-click on the desktop for quick actions</li>
+            </ul>
+          </div>
+
+          <div class="mb-4">
+            <h3 class="font-bold text-sm mb-2">Available Applications</h3>
+            <ul class="list-disc pl-4 text-[12px]">
+              <li><b>Terminal:</b> Command-line interface</li>
+              <li><b>Notepad:</b> Text editor with your information</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="font-bold text-sm mb-2">Tips</h3>
+            <ul class="list-disc pl-4 text-[12px]">
+              <li>Windows can be dragged by their title bars</li>
+              <li>Use the minimize button to hide windows</li>
+              <li>Click "Shut Down" in the Start menu to exit</li>
+            </ul>
+          </div>
+        </div>
+      `,
+      width: 400,
+      height: 500,
+      isResizable: true,
+      isMaximized: false,
+      position: { x: 150, y: 50 },
+      zIndex: this.getNextZIndex(),
+    };
+
+    this.openHelpWindows.push(helpWindow);
+  }
+
+  closeHelpWindow(id: string) {
+    this.openHelpWindows = this.openHelpWindows.filter((w) => w.id !== id);
+  }
+
+  minimizeHelpWindow(id: string) {
+    const helpWindow = this.openHelpWindows.find((w) => w.id === id);
+    if (helpWindow) {
+      helpWindow.isMaximized = false;
+    }
+  }
+
+  maximizeHelpWindow(id: string) {
+    const helpWindow = this.openHelpWindows.find((w) => w.id === id);
+    if (helpWindow) {
+      helpWindow.isMaximized = !helpWindow.isMaximized;
+    }
+  }
+
+  updateHelpWindowPosition(id: string, position: { x: number; y: number }) {
+    const helpWindow = this.openHelpWindows.find((w) => w.id === id);
+    if (helpWindow) {
+      helpWindow.position.x = position.x;
+      helpWindow.position.y = position.y;
+    }
+  }
+
+  focusHelpWindow(id: string) {
+    const maxZIndex = Math.max(...this.openHelpWindows.map((w) => w.zIndex));
+    const helpWindow = this.openHelpWindows.find((w) => w.id === id);
+    if (helpWindow) {
+      helpWindow.zIndex = maxZIndex + 1;
+    }
   }
 }

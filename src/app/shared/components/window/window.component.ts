@@ -214,7 +214,7 @@ export class WindowComponent implements AfterViewInit {
       // Pencereyi sınırlar içinde tut
       const maxX = window.innerWidth - this.width;
       const maxY = window.innerHeight - 36 - this.height; // Taskbar yüksekliği
-      
+
       this.x = Math.max(0, Math.min(newX, maxX));
       this.y = Math.max(0, Math.min(newY, maxY));
 

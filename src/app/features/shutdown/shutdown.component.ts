@@ -11,7 +11,8 @@ import { Router } from '@angular/router';
       class="shutdown-screen h-screen w-screen bg-black flex flex-col items-center justify-center"
     >
       <!-- aheOS Logo -->
-      <div class="windows-logo text-center mb-8">
+      <div class="text-center mb-8">
+        <img src="/images/aheOS-logo.png" alt="aheOS Logo" class="w-48 h-32 mb-8" />
         <div class="text-white text-6xl font-bold tracking-wide font-win95">
           aheOS
         </div>

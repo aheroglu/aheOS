@@ -10,31 +10,39 @@ import { Router } from '@angular/router';
     <div
       class="boot-screen h-screen w-screen bg-black flex flex-col items-center justify-center"
     >
-      <!-- aheOS Logo -->
-      <div class="windows-logo text-center mb-8" [class.fade-in]="showLogo">
-        <div class="text-white text-6xl font-bold tracking-wide font-win95">
-          aheOS
+      <ng-container *ngIf="!showLogo">
+        <!-- Initial Message -->
+        <div class="text-white text-xl font-win95">{{ currentStatus }}</div>
+      </ng-container>
+
+      <ng-container *ngIf="showLogo">
+        <!-- aheOS Logo -->
+        <div class="text-center mb-8" [class.fade-in]="showLogo">
+          <img src="/images/aheOS-logo.png" alt="aheOS Logo" class="w-48 h-32 mb-8" />
+          <div class="text-white text-6xl font-bold tracking-wide font-win95">
+            aheOS
+          </div>
         </div>
-      </div>
 
-      <!-- Loading Status -->
-      <div
-        class="loading-status text-white text-xl font-win95 mt-8"
-        [class.fade-in]="showStatus"
-      >
-        {{ currentStatus }}
-      </div>
-
-      <!-- Progress Bar -->
-      <div
-        class="progress-container w-96 h-2 bg-gray-700 mt-4"
-        [class.fade-in]="showProgress"
-      >
+        <!-- Loading Status -->
         <div
-          class="progress-bar h-full bg-white"
-          [style.width.%]="progress"
-        ></div>
-      </div>
+          class="loading-status text-white text-xl font-win95 mt-8"
+          [class.fade-in]="showStatus"
+        >
+          {{ currentStatus }}
+        </div>
+
+        <!-- Progress Bar -->
+        <div
+          class="progress-container w-96 h-2 bg-gray-700 mt-4"
+          [class.fade-in]="showProgress"
+        >
+          <div
+            class="progress-bar h-full bg-white"
+            [style.width.%]="progress"
+          ></div>
+        </div>
+      </ng-container>
     </div>
   `,
   styles: [

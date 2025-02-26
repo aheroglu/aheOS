@@ -15,15 +15,15 @@ interface MenuItem {
   imports: [CommonModule],
   template: `
     <div
-      class="start-menu window bg-[#c0c0c0] absolute bottom-[28px] left-0 w-[280px]"
+      class="start-menu window bg-[#c0c0c0] absolute bottom-[28px] left-0 w-[200px]"
     >
       <div
-        class="sidebar bg-[#000080] w-[30px] absolute left-0 top-0 bottom-0 flex flex-col justify-end"
+        class="sidebar bg-[#000080] w-[35px] absolute left-0 top-0 bottom-0 flex flex-col justify-end"
       >
         <div
-          class="windows-95-text text-white transform -rotate-90 mb-8 whitespace-nowrap"
+          class="text-[30px] tracking-widest text-white transform -rotate-90 mb-8 whitespace-nowrap  font-bold font-mono"
         >
-          Windows 95
+          <span class="italic">ahe</span>OS
         </div>
       </div>
 
@@ -55,9 +55,10 @@ interface MenuItem {
   `,
   styles: [
     `
-      .windows-95-text {
-        font-family: 'Microsoft Sans Serif', sans-serif;
-        transform-origin: bottom left;
+      :host {
+        display: block;
+        height: 100vh;
+        width: 100vw;
       }
 
       .window {
@@ -90,7 +91,7 @@ export class StartMenuComponent {
       ],
     },
     { name: 'Settings', icon: '/icons/settings.png' },
-    { name: 'Help', icon: '/icons/help-question-mark.png' },
+    { name: 'Help', icon: '/icons/help.png', type: 'help' },
   ];
 
   onItemClick(item: MenuItem): void {

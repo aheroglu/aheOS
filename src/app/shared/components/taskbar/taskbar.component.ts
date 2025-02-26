@@ -23,8 +23,8 @@ interface TaskbarWindow {
         [class.active]="isStartMenuOpen"
         (click)="toggleStartMenu()"
       >
-        <img src="/icons/windows.png" alt="Start" class="w-4 h-4" />
-        <span class="text-[11px]">aheOS</span>
+        <img src="/images/aheOS-logo.png" alt="Start" class="w-6 h-4" />
+        <span class="text-[14px] italic font-bold">aheOS</span>
       </button>
 
       <!-- Active Windows -->
@@ -45,8 +45,8 @@ interface TaskbarWindow {
       <div
         class="clock h-[30px] px-2 flex flex-col justify-center border-[1px] border-inset ml-1"
       >
-        <span class="text-[11px] leading-none">{{ currentTime }}</span>
-        <span class="text-[11px] leading-none mt-1">{{ currentDate }}</span>
+        <span class="text-[12px] leading-none">{{ currentTime }}</span>
+        <span class="text-[12px] leading-none mt-1">{{ currentDate }}</span>
       </div>
     </div>
   `,
