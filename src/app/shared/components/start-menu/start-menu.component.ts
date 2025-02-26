@@ -4,9 +4,8 @@ import { CommonModule } from '@angular/common';
 interface MenuItem {
   name: string;
   icon: string;
-  action?: () => void;
-  submenu?: MenuItem[];
   type?: string;
+  submenu?: MenuItem[];
 }
 
 @Component({
@@ -21,7 +20,7 @@ interface MenuItem {
         class="sidebar bg-[#000080] w-[35px] absolute left-0 top-0 bottom-0 flex flex-col justify-end"
       >
         <div
-          class="text-[30px] tracking-widest text-white transform -rotate-90 mb-8 whitespace-nowrap  font-bold font-mono"
+          class="text-[30px] tracking-widest text-white transform -rotate-90 mb-8 whitespace-nowrap font-bold font-mono"
         >
           <span class="italic">ahe</span>OS
         </div>
@@ -30,14 +29,38 @@ interface MenuItem {
       <div class="menu-items pl-[38px] py-2">
         @for (item of menuItems; track item.name) {
         <div
-          class="menu-item flex items-center px-2 py-1 hover:bg-[#000080] hover:text-white cursor-pointer"
+          class="menu-item flex items-center px-2 py-1 hover:bg-[#000080] hover:text-white cursor-pointer relative"
           (click)="onItemClick(item)"
+          (mouseenter)="showSubmenu(item)"
+          (mouseleave)="hideSubmenu()"
         >
           <img [src]="item.icon" [alt]="item.name" class="w-6 h-6 mr-2" />
           <span>{{ item.name }}</span>
           @if (item.submenu) {
           <span class="ml-auto">▶</span>
-          }
+
+          <!-- Submenu -->
+          @if (activeSubmenu === item) {
+          <div
+            class="submenu absolute left-[160px] top-[-11px] bg-[#c0c0c0] border-[1px] border-[#dfdfdf] shadow-md w-[200px]"
+            (mouseenter)="showSubmenu(item)"
+            (mouseleave)="hideSubmenu()"
+          >
+            @for (subItem of item.submenu; track subItem.name) {
+            <div
+              class="submenu-item flex items-center px-2 py-1 hover:bg-[#000080] hover:text-white cursor-pointer"
+              (click)="onSubItemClick($event, subItem)"
+            >
+              <img
+                [src]="subItem.icon"
+                [alt]="subItem.name"
+                class="w-6 h-6 mr-2"
+              />
+              <span>{{ subItem.name }}</span>
+            </div>
+            }
+          </div>
+          } }
         </div>
         }
 
@@ -65,6 +88,11 @@ interface MenuItem {
         box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf,
           inset -2px -2px grey, inset 2px 2px #fff;
       }
+
+      .submenu {
+        box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf,
+          inset -2px -2px grey, inset 2px 2px #fff;
+      }
     `,
   ],
 })
@@ -73,13 +101,8 @@ export class StartMenuComponent {
   @Output() shutDown = new EventEmitter<void>();
   @Output() onStartMenuItemClick = new EventEmitter<MenuItem>();
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.start-button') && !target.closest('.start-menu')) {
-      this.menuClose.emit();
-    }
-  }
+  activeSubmenu: MenuItem | null = null;
+  submenuTimeout: any = null;
 
   menuItems: MenuItem[] = [
     {
@@ -94,7 +117,34 @@ export class StartMenuComponent {
     { name: 'Help', icon: '/icons/help.png', type: 'help' },
   ];
 
+  showSubmenu(item: MenuItem): void {
+    if (this.submenuTimeout) {
+      clearTimeout(this.submenuTimeout);
+      this.submenuTimeout = null;
+    }
+    if (item.submenu) {
+      this.activeSubmenu = item;
+    }
+  }
+
+  hideSubmenu(): void {
+    this.submenuTimeout = setTimeout(() => {
+      this.activeSubmenu = null;
+      this.submenuTimeout = null;
+    }, 100);
+  }
+
   onItemClick(item: MenuItem): void {
+    if (!item.submenu && item.type) {
+      this.menuClose.emit();
+      this.onStartMenuItemClick.emit(item);
+    }
+  }
+
+  onSubItemClick(event: MouseEvent, item: MenuItem): void {
+    console.log(item);
+
+    event.stopPropagation();
     if (item.type) {
       this.menuClose.emit();
       this.onStartMenuItemClick.emit(item);

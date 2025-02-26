@@ -18,7 +18,11 @@ import { Router } from '@angular/router';
       <ng-container *ngIf="showLogo">
         <!-- aheOS Logo -->
         <div class="text-center mb-8" [class.fade-in]="showLogo">
-          <img src="/images/aheOS-logo.png" alt="aheOS Logo" class="w-48 h-32 mb-8" />
+          <img
+            src="/images/aheOS-logo.png"
+            alt="aheOS Logo"
+            class="w-48 h-32 mb-8"
+          />
           <div class="text-white text-6xl font-bold tracking-wide font-win95">
             aheOS
           </div>
@@ -80,7 +84,7 @@ import { Router } from '@angular/router';
 })
 export class BootComponent implements OnInit {
   progress: number = 0;
-  currentStatus: string = 'Click anywhere to start Windows 95...';
+  currentStatus: string = 'Click anywhere to start aheOS...';
   showLogo: boolean = false;
   showStatus: boolean = true;
   showProgress: boolean = false;

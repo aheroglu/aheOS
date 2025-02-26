@@ -29,7 +29,8 @@ import { WindowService } from '../../services/window.service';
         <input
           #cmdInput
           type="text"
-          class="flex-1 bg-transparent border border-black outline-none text-white font-mono text-[16px] leading-tight p-0"
+          placeholder="Type 'help' for help, 'clear' to clear the screen, or enter a command"
+          class="flex-1 bg-transparent border placeholder:italic border-black outline-none text-white font-mono text-[16px] leading-tight p-0"
           [(ngModel)]="currentCommand"
           (keydown.enter)="executeCommand()"
           autocomplete="off"
@@ -83,11 +84,14 @@ export class TerminalComponent implements AfterViewInit {
     '   | (_| | | | |  __/ |_| |___) |',
     '    \\__,_|_| |_|\\___|\\___/|____/ ',
     '',
+    '           I ♥ Open Source',
+    '',
     '    Operating System Version 1.0.0',
     '    Developed by Ahmet Hakan Eroğlu',
     '    GitHub: github.com/aheroglu',
     '    LinkedIn: linkedin.com/in/aheroglu',
-    '    Website: aheroglu.dev',
+    '',
+    '    You can access all source code on "github.com/aheroglu/aheOS"',
     '',
   ];
 
@@ -106,15 +110,15 @@ export class TerminalComponent implements AfterViewInit {
       switch (this.currentCommand.toLowerCase().trim()) {
         case 'help':
           this.outputLines.push(
-            'Kullanılabilir komutlar:',
+            'Available commands:',
             '',
-            'help     - Bu yardım mesajını gösterir',
-            'clear    - Ekranı temizler',
-            'date     - Mevcut tarihi gösterir',
-            'time     - Mevcut saati gösterir',
-            'about    - aheOS hakkında bilgi',
-            'ver      - aheOS sürüm bilgisi',
-            'exit     - Terminali kapatır',
+            'help     - This shows the help message',
+            'clear    - Clears the screen',
+            'date     - Shows the current date',
+            'time     - Shows the current time',
+            'about    - Shows information about the operating system',
+            'ver      - Shows the version information of the operating system',
+            'exit     - Closes the terminal',
             ''
           );
           break;

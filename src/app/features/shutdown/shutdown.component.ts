@@ -45,7 +45,7 @@ import { Router } from '@angular/router';
   ],
 })
 export class ShutdownComponent implements OnInit {
-  currentMessage: string = 'Windows 95 is shutting down...';
+  currentMessage: string = 'aheOS is shutting down...';
   progressDots: string = '';
   private audio: HTMLAudioElement;
 

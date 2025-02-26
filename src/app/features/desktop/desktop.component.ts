@@ -440,7 +440,17 @@ export class DesktopComponent {
     } else if (item.type === 'help') {
       this.openHelpWindow();
     } else if (item.type) {
-      this.openApplication(item);
+      // Start menüsünden gelen item'ı desktop icon formatına çevir
+      const desktopIcon: DesktopIcon = {
+        id: this.activeWindows.length + 1,
+        name:
+          item.name || item.type.charAt(0).toUpperCase() + item.type.slice(1),
+        icon: item.icon || `/icons/${item.type}.png`,
+        appType: item.type as 'terminal' | 'notepad' | 'computer' | 'web',
+        isSelected: false,
+        url: item.url,
+      };
+      this.openApplication(desktopIcon);
     }
   }
 
