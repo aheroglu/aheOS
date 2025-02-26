@@ -1,0 +1,51 @@
+name: Deploy Angular App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.15.0'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Angular app
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: angular-app
+          path: dist/ahe-os/browser/*
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:        
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: angular-app
+          path: dist/ahe-os/browser
+
+      - name: Deploy to FTP server
+        uses: SamKirkland/FTP-Deploy-Action@4.2.0
+        with:
+          server: ftp.aheroglu.dev
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: dist/ahe-os/browser/
+          server-dir: aheroglu.dev/
