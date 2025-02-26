@@ -48,4 +48,4 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: dist/ahe-os/browser/
-          server-dir: aheroglu.dev/
+          server-dir: httpdocs/
