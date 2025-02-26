@@ -107,7 +107,7 @@ export class ComputerComponent implements OnInit {
   selectedItem: GitHubFile | null = null;
   currentPath: string[] = [];
   baseUrl =
-    'https://api.github.com/repos/aheroglu/clean-architecture-starter/contents';
+    'https://api.github.com/repos/aheroglu/aheOS/contents';
 
   constructor(private http: HttpClient) {}
 
