@@ -29,7 +29,7 @@ import { WindowService } from '../../services/window.service';
         <input
           #cmdInput
           type="text"
-          placeholder="Type 'help' for help, 'clear' to clear the screen, or enter a command"
+          placeholder="Type 'help' for help, 'about' to show information, 'clear' to clear the screen or enter a command"
           class="flex-1 bg-transparent border placeholder:italic border-black outline-none text-white font-mono text-[16px] leading-tight p-0"
           [(ngModel)]="currentCommand"
           (keydown.enter)="executeCommand()"
