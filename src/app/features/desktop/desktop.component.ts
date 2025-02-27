@@ -63,7 +63,9 @@ interface HelpWindow {
   ],
   template: `
     <div
-      class="desktop-container h-screen w-screen bg-[#008080] relative overflow-hidden"
+      class="desktop-container h-screen w-screen {{
+        background
+      }} relative overflow-hidden"
       (click)="onDesktopClick($event)"
       (contextmenu)="onRightClick($event)"
     >
@@ -72,27 +74,41 @@ interface HelpWindow {
         class="win95-context-menu"
         [ngStyle]="{ 'top.px': menuPosition.y, 'left.px': menuPosition.x }"
       >
-        <li class="win95-menu-item" (click)="menuItemClick('Item 1')">
-          Item 1
+        <li class="win95-menu-item" (click)="menuItemClick('large-icons')">
+          Large Icons
         </li>
-        <li class="win95-menu-item" (click)="menuItemClick('Item 2')">
-          Item 2
+        <li class="win95-menu-item" (click)="menuItemClick('medium-icons')">
+          Medium Icons
+        </li>
+        <li class="win95-menu-item" (click)="menuItemClick('small-icons')">
+          Small Icons
         </li>
         <li class="win95-menu-separator"></li>
-        <li class="win95-menu-item" (click)="menuItemClick('Item 3')">
-          Item 3
+        <li
+          class="win95-menu-item"
+          (click)="menuItemClick('change-background')"
+        >
+          Change background
         </li>
       </ul>
 
-      <div class="desktop-icons grid grid-cols-1 gap-1 p-1 mt-2 w-[70px]">
-        <app-desktop-icon
+      <div
+        class="desktop-icons flex  flex-col flex-wrap h-[calc(100vh-30px)] gap-1 p-1 mt-2"
+        style="max-height: calc(100vh - 30px); width: fit-content;"
+      >
+        <div
+          class="w-[70px]"
           *ngFor="let icon of desktopIcons; trackBy: trackIcon"
-          [name]="icon.name"
-          [iconPath]="icon.icon"
-          [isSelected]="icon.isSelected"
-          (select)="onIconSelect($event, icon)"
-          (dblclick)="openApplication(icon)"
-        />
+        >
+          <app-desktop-icon
+            [name]="icon.name"
+            [iconPath]="icon.icon"
+            [isSelected]="icon.isSelected"
+            [size]="iconSize"
+            (select)="onIconSelect($event, icon)"
+            (dblclick)="openApplication(icon)"
+          />
+        </div>
       </div>
 
       <ng-container *ngFor="let window of activeWindows; trackBy: trackWindow">
@@ -171,6 +187,7 @@ interface HelpWindow {
         padding: 2px;
         box-shadow: 1px 1px 0 0 #000;
         min-width: 160px;
+        z-index: 9999;
       }
 
       .win95-menu-item {
@@ -197,8 +214,17 @@ interface HelpWindow {
   ],
 })
 export class DesktopComponent {
+  backgrounds: string[] = [
+    'bg-[#008080]',
+    'bg-[#e35f5f]',
+    'bg-[#394dcd]',
+    'bg-[#dfe300]',
+    'bg-[#6c6c6c]',
+  ];
+  background: string = this.backgrounds[0];
   showMenu = false;
   menuPosition = { x: 0, y: 0 };
+  iconSize: string = 'medium';
 
   desktopIcons: DesktopIcon[] = [
     {
@@ -266,10 +292,12 @@ export class DesktopComponent {
   constructor(private windowService: WindowService, private router: Router) {
     this.windowService.closeWindow$.subscribe((windowId) => {
       if (windowId === 'terminal') {
-        // Terminal penceresini kapat
         this.closeTerminal();
       }
     });
+
+    this.background = localStorage.getItem('background') || this.backgrounds[0];
+    this.iconSize = localStorage.getItem('icon-size') || 'medium';
   }
 
   trackIcon(index: number, icon: DesktopIcon): string {
@@ -462,13 +490,32 @@ export class DesktopComponent {
     event.preventDefault();
 
     this.showMenu = true;
+    this.isStartMenuOpen = false;
     this.menuPosition.x = event.clientX;
     this.menuPosition.y = event.clientY;
   }
 
   menuItemClick(item: string) {
-    console.log(item + ' clicked!');
-    this.showMenu = false; // Menü kapatılır
+    if (item === 'large-icons') {
+      this.iconSize = 'large';
+      localStorage.setItem('icon-size', 'large');
+    } else if (item === 'medium-icons') {
+      this.iconSize = 'medium';
+      localStorage.setItem('icon-size', 'medium');
+    } else if (item === 'small-icons') {
+      this.iconSize = 'small';
+      localStorage.setItem('icon-size', 'small');
+    } else if (item === 'change-background') {
+      let newBackground: string;
+      do {
+        const randomIndex = Math.floor(Math.random() * this.backgrounds.length);
+        newBackground = this.backgrounds[randomIndex];
+      } while (newBackground === this.background);
+      this.background = newBackground;
+      localStorage.setItem('background', this.background);
+    }
+
+    this.showMenu = false;
   }
 
   closeTerminal() {

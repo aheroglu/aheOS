@@ -1,7 +1,14 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  HostListener,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WindowService } from '../../services/window.service';
+import { GithubService } from '../../services/github.service';
 
 @Component({
   selector: 'app-terminal',
@@ -72,10 +79,15 @@ import { WindowService } from '../../services/window.service';
 export class TerminalComponent implements AfterViewInit {
   @ViewChild('cmdInput') cmdInput!: ElementRef<HTMLInputElement>;
 
-  constructor(private windowService: WindowService) {}
+  constructor(
+    private windowService: WindowService,
+    private githubService: GithubService
+  ) {}
 
   outputLines: string[] = [];
   currentCommand = '';
+  commandHistory: string[] = [];
+  currentHistoryIndex = -1;
 
   private readonly asciiArt = [
     '          _           ___  ____  ',
@@ -86,7 +98,7 @@ export class TerminalComponent implements AfterViewInit {
     '',
     '           I ♥ Open Source',
     '',
-    '    Operating System Version 1.0.0',
+    '    Operating System [Version 1.0.1]',
     '    Developed by Ahmet Hakan Eroğlu',
     '    GitHub: github.com/aheroglu',
     '    LinkedIn: linkedin.com/in/aheroglu',
@@ -94,6 +106,36 @@ export class TerminalComponent implements AfterViewInit {
     '    You can access all source code on "github.com/aheroglu/aheOS"',
     '',
   ];
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.navigateHistory('up');
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.navigateHistory('down');
+    }
+  }
+
+  navigateHistory(direction: 'up' | 'down') {
+    if (this.commandHistory.length === 0) return;
+
+    if (direction === 'up') {
+      if (this.currentHistoryIndex < this.commandHistory.length - 1) {
+        this.currentHistoryIndex++;
+        this.currentCommand = this.commandHistory[this.currentHistoryIndex];
+      }
+    } else {
+      if (this.currentHistoryIndex > 0) {
+        this.currentHistoryIndex--;
+        this.currentCommand = this.commandHistory[this.currentHistoryIndex];
+      } else if (this.currentHistoryIndex === 0) {
+        this.currentHistoryIndex = -1;
+        this.currentCommand = '';
+      }
+    }
+  }
 
   ngAfterViewInit() {
     this.cmdInput.nativeElement.focus();
@@ -106,6 +148,8 @@ export class TerminalComponent implements AfterViewInit {
   executeCommand() {
     if (this.currentCommand.trim()) {
       this.outputLines.push(`C:\\> ${this.currentCommand}`);
+      this.commandHistory.unshift(this.currentCommand);
+      this.currentHistoryIndex = -1;
 
       switch (this.currentCommand.toLowerCase().trim()) {
         case 'help':
@@ -119,6 +163,7 @@ export class TerminalComponent implements AfterViewInit {
             'about    - Shows information about the operating system',
             'ver      - Shows the version information of the operating system',
             'exit     - Closes the terminal',
+            'dir      - Lists the files in the aheOS repository',
             ''
           );
           break;
@@ -136,10 +181,29 @@ export class TerminalComponent implements AfterViewInit {
           break;
 
         case 'ver':
-          this.outputLines.push('aheOS [Version 1.0.0]');
+          this.outputLines.push('aheOS [Version 1.0.1]');
           break;
+          
         case 'about':
           this.asciiArt.forEach((line) => this.outputLines.push(line));
+          break;
+
+        case 'dir':
+          this.githubService.getRepositoryContents().subscribe({
+            next: (contents) => {
+              this.outputLines.push(' Directory of aheOS Repository\n');
+              contents.forEach((item) => {
+                const size = item.size.toString().padStart(10, ' ');
+                this.outputLines.push(`${size}  ${item.name}`);
+              });
+              this.outputLines.push('\n');
+            },
+            error: () => {
+              this.outputLines.push(
+                'Error: Unable to fetch repository contents.\n'
+              );
+            },
+          });
           break;
 
         case 'exit':

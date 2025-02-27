@@ -23,7 +23,6 @@ import { CommonModule } from '@angular/common';
       [style.height.px]="currentHeight"
       [style.z-index]="zIndex"
       [style.transform]="getTransform()"
-      style="will-change: transform"
     >
       <!-- Pencere Başlığı -->
       <div
@@ -57,7 +56,6 @@ import { CommonModule } from '@angular/common';
         min-height: 100px;
         display: flex;
         flex-direction: column;
-        transition: transform 0.2s ease-in-out;
         transform-origin: center center;
         top: 0;
         left: 0;
@@ -72,7 +70,6 @@ import { CommonModule } from '@angular/common';
           transform: scale(0.1) !important;
           opacity: 0;
           pointer-events: none;
-          transition: all 0.2s ease-in-out;
         }
 
         &.dragging {
