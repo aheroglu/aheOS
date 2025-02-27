@@ -148,7 +148,7 @@ export class TerminalComponent implements AfterViewInit {
 
         default:
           this.outputLines.push(
-            `'${this.currentCommand}' komutu bulunamadı.\nKullanılabilir komutları görmek için 'help' yazın.`
+            `'${this.currentCommand}' command not found.\nType 'help' for available commands.`
           );
       }
 
