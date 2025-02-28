@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WindowService } from '../../services/window.service';
 import { GithubService } from '../../services/github.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-terminal',
@@ -81,7 +82,8 @@ export class TerminalComponent implements AfterViewInit {
 
   constructor(
     private windowService: WindowService,
-    private githubService: GithubService
+    private githubService: GithubService,
+    private router: Router
   ) {}
 
   outputLines: string[] = [];
@@ -98,13 +100,31 @@ export class TerminalComponent implements AfterViewInit {
     '',
     '           I ♥ Open Source',
     '',
-    '    Operating System [Version 1.0.1]',
+    '    Operating System [Version 1.0.2]',
     '    Developed by Ahmet Hakan Eroğlu',
     '    GitHub: github.com/aheroglu',
     '    LinkedIn: linkedin.com/in/aheroglu',
     '',
     '    You can access all source code on "github.com/aheroglu/aheOS"',
     '',
+  ];
+
+  private readonly socialLinks: Record<string, string> = {
+    github: 'https://github.com/aheroglu',
+    linkedin: 'https://linkedin.com/in/aheroglu'
+  };
+
+  private readonly availableCommands = [
+    'about    - Shows information about the operating system',
+    'clear    - Clears the screen',
+    'date     - Shows the current date',
+    'dir      - Lists the files in the aheOS repository',
+    'exit     - Closes the terminal',
+    'help     - This shows the help message',
+    'open     - Opens specified social media links (use "open --help" for more info)',
+    'shutdown - Shuts down the operating system',
+    'time     - Shows the current time',
+    'ver      - Shows the version information of the operating system',
   ];
 
   @HostListener('window:keydown', ['$event'])
@@ -151,19 +171,41 @@ export class TerminalComponent implements AfterViewInit {
       this.commandHistory.unshift(this.currentCommand);
       this.currentHistoryIndex = -1;
 
-      switch (this.currentCommand.toLowerCase().trim()) {
+      const command = this.currentCommand.toLowerCase().trim();
+
+      if (command.startsWith('open')) {
+        const args = command.split(' ');
+        if (args.length === 1) {
+          this.outputLines.push('Usage: open <platform>');
+          this.outputLines.push('Example: open github');
+          this.outputLines.push('');
+          this.outputLines.push('Use "open --help" to see available platforms');
+        } else if (args[1] === '--help') {
+          this.outputLines.push('Available platforms:');
+          this.outputLines.push('');
+          Object.keys(this.socialLinks).forEach(platform => {
+            this.outputLines.push(`${platform.padEnd(10)} - Opens ${this.socialLinks[platform]}`);
+          });
+        } else {
+          const platform = args[1];
+          if (this.socialLinks[platform]) {
+            window.open(this.socialLinks[platform], '_blank');
+            this.outputLines.push(`Opening ${platform} in a new tab...`);
+          } else {
+            this.outputLines.push(`Error: Unknown platform "${platform}"`);
+            this.outputLines.push('Use "open --help" to see available platforms');
+          }
+        }
+        this.currentCommand = '';
+        return;
+      }
+
+      switch (command) {
         case 'help':
           this.outputLines.push(
             'Available commands:',
             '',
-            'help     - This shows the help message',
-            'clear    - Clears the screen',
-            'date     - Shows the current date',
-            'time     - Shows the current time',
-            'about    - Shows information about the operating system',
-            'ver      - Shows the version information of the operating system',
-            'exit     - Closes the terminal',
-            'dir      - Lists the files in the aheOS repository',
+            ...this.availableCommands,
             ''
           );
           break;
@@ -181,9 +223,9 @@ export class TerminalComponent implements AfterViewInit {
           break;
 
         case 'ver':
-          this.outputLines.push('aheOS [Version 1.0.1]');
+          this.outputLines.push('aheOS [Version 1.0.2]');
           break;
-          
+
         case 'about':
           this.asciiArt.forEach((line) => this.outputLines.push(line));
           break;
@@ -204,6 +246,13 @@ export class TerminalComponent implements AfterViewInit {
               );
             },
           });
+          break;
+
+        case 'shutdown':
+          this.outputLines.push('Shutting down aheOS...\n');
+          setTimeout(() => {
+            this.router.navigate(['/shutdown']);
+          }, 1500);
           break;
 
         case 'exit':

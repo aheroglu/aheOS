@@ -1,59 +1,102 @@
-# AheOS
+# 🖥️ aheOS
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.6.
+<div align="center">
+  <img src="/public/images/aheOS-logo.png" alt="aheOS Logo" width="200"/>
+  
+  ![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
+  ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind_CSS-grey?style=for-the-badge&logo=tailwind-css&logoColor=38B2AC)
+  
+  [![GitHub Stars](https://img.shields.io/github/stars/aheroglu/aheOS?style=social)](https://github.com/aheroglu/aheOS)
+  [![GitHub Forks](https://img.shields.io/github/forks/aheroglu/aheOS?style=social)](https://github.com/aheroglu/aheOS/fork)
+</div>
 
-## Development server
+## 📖 About
 
-To start a local development server, run:
+aheOS is a modern web-based operating system interface built with Angular. It provides a desktop-like experience right in your browser, complete with a terminal, window management system, and various applications.
 
-```bash
-ng serve
-```
+### ✨ Key Features
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- 🖥️ **Desktop Environment**: Complete with icons, windows, and taskbar
+- 💻 **Terminal**: Built-in terminal with custom commands
+- 🪟 **Window Management**: Drag, resize, minimize, and maximize windows
+- 🎨 **Modern UI**: Clean and intuitive user interface
+- 📱 **Responsive Design**: Works on various screen sizes
+- 🔄 **Real-time Updates**: Instant response to user interactions
 
-## Code scaffolding
+## 🚀 Live Demo
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Experience aheOS live at: [https://aheroglu.dev](https://aheroglu.dev)
 
-```bash
-ng generate component component-name
-```
+## 🛠️ Installation
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+1. **Clone the repository**
 
-```bash
-ng generate --help
-```
+   ```bash
+   git clone https://github.com/aheroglu/aheOS.git
+   cd aheOS
+   ```
 
-## Building
+2. **Install dependencies**
 
-To build the project run:
+   ```bash
+   npm install
+   ```
 
-```bash
-ng build
-```
+3. **Start the development server**
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+   ```bash
+   ng serve
+   ```
 
-## Running unit tests
+4. **Open your browser**
+   Navigate to `http://localhost:4200`
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## 💻 Available Commands
 
-```bash
-ng test
-```
+| Command    | Description               |
+| ---------- | ------------------------- |
+| `ng serve` | Starts development server |
+| `ng build` | Builds the project        |
+| `ng test`  | Runs unit tests           |
+| `ng e2e`   | Runs end-to-end tests     |
 
-## Running end-to-end tests
+## 🖥️ Terminal Commands
 
-For end-to-end (e2e) testing, run:
+| Command | Description                |
+| ------- | -------------------------- |
+| `about` | Shows system information   |
+| `clear` | Clears the terminal screen |
+| `date`  | Shows current date         |
+| `dir`   | Lists repository files     |
+| `help`  | Shows available commands   |
+| `open`  | Opens social media links   |
+| `time`  | Shows current time         |
+| `ver`   | Shows system version       |
 
-```bash
-ng e2e
-```
+## 🤝 Contributing
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Contributions are welcome! Feel free to:
 
-## Additional Resources
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/improvement`)
+3. Make your changes
+4. Commit your changes (`git commit -am 'Add new feature'`)
+5. Push to the branch (`git push origin feature/improvement`)
+6. Create a Pull Request
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👨‍💻 Author
+
+**Ahmet Hakan Eroğlu**
+
+- GitHub: [@aheroglu](https://github.com/aheroglu)
+- LinkedIn: [aheroglu](https://linkedin.com/in/aheroglu)
+- Portfolio: [aheroglu.dev](https://aheroglu.dev)
+
+## ⭐ Show Your Support
+
+Give a ⭐️ if you like this project!
