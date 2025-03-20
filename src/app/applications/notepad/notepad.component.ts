@@ -111,11 +111,11 @@ export class NotepadComponent implements OnInit {
     {
       id: 'about',
       title: 'About me.txt',
-      content: `I embarked on my software development journey with C# programming language, long before my university education. After following tutorials on Console, Form, and dynamic Web applications, I enhanced my practical skills by developing various applications.
+      content: `I embarked on my software development journey with C# programming language before my university education. After following tutorials and building desktop and dynamic web applications, I enhanced my practical skills through various projects.
 
-In terms of enterprise-level application development, I am working on N-Tier, Onion, and Clean architectures with .NET Core. Through these architectures, I have focused on producing scalable and sustainable software solutions.
+In enterprise-level development, I specialize in N-Tier, Onion, and Clean architectures using .NET Core. These architectures enable me to create scalable and sustainable software solutions.
 
-Additionally, I have gained experience in developing dynamic web applications using Angular as a front-end technology. I continue to add new knowledge to my software development career every day, taking great pleasure in developing myself on this endless journey.
+Furthermore, I have gained valuable experience in developing dynamic web applications using Angular for the front-end. I continue to expand my knowledge daily, enjoying the continuous evolution of my software development career.
 
 GitHub: github.com/aheroglu
 LinkedIn: linkedin.com/in/aheroglu`,

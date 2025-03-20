@@ -6,47 +6,24 @@ import { TerminalComponent } from '../../applications/terminal/terminal.componen
 import { NotepadComponent } from '../../applications/notepad/notepad.component';
 import { BrowserComponent } from '../../applications/browser/browser.component';
 import { ComputerComponent } from '../../applications/computer/computer.component';
+import { ProgramsComponent } from '../../applications/programs/programs.component';
 import { CommonModule } from '@angular/common';
 import { StartMenuComponent } from '../../shared/components/start-menu/start-menu.component';
 import { WindowService } from '../../services/window.service';
 import { Router } from '@angular/router';
-
-interface DesktopIcon {
-  id: number;
-  name: string;
-  icon: string;
-  appType: 'terminal' | 'notepad' | 'computer' | 'web';
-  isSelected: boolean;
-  url?: string;
-}
-
-interface Window {
-  id: number;
-  title: string;
-  icon: string;
-  type: 'terminal' | 'notepad' | 'computer' | 'web';
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  zIndex: number;
-  isMinimized: boolean;
-  isMaximized: boolean;
-  url?: string;
-}
-
-interface HelpWindow {
-  id: string;
-  title: string;
-  icon: string;
-  content: string;
-  width: number;
-  height: number;
-  isResizable: boolean;
-  isMaximized: boolean;
-  position: { x: number; y: number };
-  zIndex: number;
-}
+import {
+  ContextMenuComponent,
+  ContextMenuItem,
+} from '../../shared/components/context-menu/context-menu.component';
+import { WindowManagerService } from '../../services/window-manager.service';
+import { DesktopIconService } from '../../services/desktop-icon.service';
+import { HelpWindowService } from '../../services/help-window.service';
+import { BackgroundService } from '../../services/background.service';
+import {
+  DesktopIcon,
+  Window,
+  HelpWindow,
+} from '../../shared/models/desktop.models';
 
 @Component({
   standalone: true,
@@ -59,7 +36,9 @@ interface HelpWindow {
     NotepadComponent,
     BrowserComponent,
     ComputerComponent,
+    ProgramsComponent,
     StartMenuComponent,
+    ContextMenuComponent,
   ],
   template: `
     <div
@@ -69,28 +48,13 @@ interface HelpWindow {
       (click)="onDesktopClick($event)"
       (contextmenu)="onRightClick($event)"
     >
-      <ul
-        *ngIf="showMenu"
-        class="win95-context-menu"
-        [ngStyle]="{ 'top.px': menuPosition.y, 'left.px': menuPosition.x }"
-      >
-        <li class="win95-menu-item" (click)="menuItemClick('large-icons')">
-          Large Icons
-        </li>
-        <li class="win95-menu-item" (click)="menuItemClick('medium-icons')">
-          Medium Icons
-        </li>
-        <li class="win95-menu-item" (click)="menuItemClick('small-icons')">
-          Small Icons
-        </li>
-        <li class="win95-menu-separator"></li>
-        <li
-          class="win95-menu-item"
-          (click)="menuItemClick('change-background')"
-        >
-          Change background
-        </li>
-      </ul>
+      <app-context-menu
+        [isVisible]="showMenu"
+        [position]="menuPosition"
+        [menuItems]="contextMenuItems"
+        (itemClick)="menuItemClick($event)"
+        (close)="showMenu = false"
+      ></app-context-menu>
 
       <div
         class="desktop-icons flex  flex-col flex-wrap h-[calc(100vh-30px)] gap-1 p-1 mt-2"
@@ -134,13 +98,14 @@ interface HelpWindow {
               <app-notepad *ngSwitchCase="'notepad'" />
               <app-browser *ngSwitchCase="'web'" [url]="window.url || ''" />
               <app-computer *ngSwitchCase="'computer'" />
+              <app-programs *ngSwitchCase="'programs'" />
             </ng-container>
           </div>
         </app-window>
       </ng-container>
 
       <ng-container
-        *ngFor="let helpWindow of openHelpWindows; trackBy: trackHelpWindow"
+        *ngFor="let helpWindow of helpWindows; trackBy: trackHelpWindow"
       >
         <app-window
           #helpWindowComponent
@@ -171,135 +136,74 @@ interface HelpWindow {
 
       <app-taskbar
         class="absolute bottom-0 left-0 right-0"
-        [activeWindows]="getTaskbarWindows()"
+        [activeWindows]="taskbarWindows"
         (windowSelect)="restoreWindow($event)"
         (startMenuToggle)="toggleStartMenu()"
       />
     </div>
   `,
-  styles: [
-    `
-      .win95-context-menu {
-        position: absolute;
-        background: #c0c0c0;
-        border: 2px solid;
-        border-color: #ffffff #808080 #808080 #ffffff;
-        padding: 2px;
-        box-shadow: 1px 1px 0 0 #000;
-        min-width: 160px;
-        z-index: 9999;
-      }
-
-      .win95-menu-item {
-        padding: 4px 8px;
-        color: #000;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-      }
-
-      .win95-menu-item:hover {
-        background: #000080;
-        color: #ffffff;
-      }
-
-      .win95-menu-separator {
-        height: 1px;
-        background: #808080;
-        margin: 4px 2px;
-        border-bottom: 1px solid #ffffff;
-      }
-    `,
-  ],
+  styles: [],
 })
 export class DesktopComponent {
-  backgrounds: string[] = [
-    'bg-[#008080]',
-    'bg-[#e35f5f]',
-    'bg-[#394dcd]',
-    'bg-[#dfe300]',
-    'bg-[#6c6c6c]',
+  // Bağlam menüsü öğeleri
+  contextMenuItems: ContextMenuItem[] = [
+    { id: 'large-icons', label: 'Large Icons' },
+    { id: 'medium-icons', label: 'Medium Icons' },
+    { id: 'small-icons', label: 'Small Icons' },
+    { id: 'separator', label: '', isSeparator: true },
+    { id: 'change-background', label: 'Change background' },
   ];
-  background: string = this.backgrounds[0];
+
+  // UI durumları
   showMenu = false;
   menuPosition = { x: 0, y: 0 };
-  iconSize: string = 'medium';
-
-  desktopIcons: DesktopIcon[] = [
-    {
-      id: 1,
-      name: 'My Computer',
-      icon: '/icons/my-computer.png',
-      appType: 'computer',
-      isSelected: false,
-    },
-    {
-      id: 2,
-      name: 'Notepad',
-      icon: '/icons/notepad.png',
-      appType: 'notepad',
-      isSelected: false,
-    },
-    {
-      id: 3,
-      name: 'Terminal',
-      icon: '/icons/terminal.png',
-      appType: 'terminal',
-      isSelected: false,
-    },
-    {
-      id: 4,
-      name: 'NG Commerce',
-      icon: '/icons/browser.png',
-      appType: 'web',
-      isSelected: false,
-      url: 'https://ng-commerce.aheroglu.dev/',
-    },
-    {
-      id: 5,
-      name: 'LinkedAI',
-      icon: '/icons/linkedai.png',
-      appType: 'web',
-      isSelected: false,
-      url: 'https://linkedai.app/',
-    },
-    {
-      id: 6,
-      name: 'GitHub',
-      icon: '/icons/github.png',
-      appType: 'web',
-      isSelected: false,
-      url: 'https://github.com/aheroglu',
-    },
-    {
-      id: 7,
-      name: 'LinkedIn',
-      icon: '/icons/linkedin.png',
-      appType: 'web',
-      isSelected: false,
-      url: 'https://linkedin.com/in/aheroglu/',
-    },
-  ];
-
-  activeWindows: Window[] = [];
-  openHelpWindows: HelpWindow[] = [];
   isStartMenuOpen = false;
 
+  // Pencere bileşenleri referansları
   @ViewChildren('windowComponent')
   windowComponents!: QueryList<WindowComponent>;
 
-  constructor(private windowService: WindowService, private router: Router) {
+  constructor(
+    private windowService: WindowService,
+    private router: Router,
+    private windowManager: WindowManagerService,
+    private desktopIconService: DesktopIconService,
+    private helpWindowService: HelpWindowService,
+    private backgroundService: BackgroundService
+  ) {
     this.windowService.closeWindow$.subscribe((windowId) => {
       if (windowId === 'terminal') {
         this.closeTerminal();
       }
     });
-
-    this.background = localStorage.getItem('background') || this.backgrounds[0];
-    this.iconSize = localStorage.getItem('icon-size') || 'medium';
   }
 
+  // Getter metodları - daha temiz template bağlantıları için
+  get background(): string {
+    return this.backgroundService.background;
+  }
+
+  get iconSize(): string {
+    return this.desktopIconService.iconSize;
+  }
+
+  get desktopIcons(): DesktopIcon[] {
+    return this.desktopIconService.desktopIcons;
+  }
+
+  get activeWindows(): Window[] {
+    return this.windowManager.activeWindows;
+  }
+
+  get helpWindows(): HelpWindow[] {
+    return this.helpWindowService.helpWindows;
+  }
+
+  get taskbarWindows() {
+    return this.windowManager.getTaskbarWindows();
+  }
+
+  // TrackBy fonksiyonları - Angular performansı için
   trackIcon(index: number, icon: DesktopIcon): string {
     return icon.name;
   }
@@ -312,6 +216,7 @@ export class DesktopComponent {
     return helpWindow.id;
   }
 
+  // Masaüstü etkileşimleri
   onDesktopClick(event: MouseEvent) {
     // Start menüsünü kapat
     if (this.isStartMenuOpen) {
@@ -322,23 +227,42 @@ export class DesktopComponent {
     }
 
     // Seçili icon'ları temizle
-    this.desktopIcons.forEach((icon) => (icon.isSelected = false));
+    this.desktopIconService.clearSelection();
     this.showMenu = false;
   }
 
   onIconSelect(event: MouseEvent, selectedIcon: DesktopIcon) {
-    // CTRL tuşuna basılı değilse diğer seçimleri kaldır
-    if (!event.ctrlKey) {
-      this.desktopIcons.forEach((icon) => {
-        if (icon !== selectedIcon) {
-          icon.isSelected = false;
-        }
-      });
-    }
-
-    selectedIcon.isSelected = !selectedIcon.isSelected;
+    this.desktopIconService.selectIcon(selectedIcon, event.ctrlKey);
   }
 
+  onRightClick(event: MouseEvent) {
+    event.preventDefault();
+
+    this.showMenu = true;
+    this.isStartMenuOpen = false;
+    this.menuPosition.x = event.clientX;
+    this.menuPosition.y = event.clientY;
+  }
+
+  menuItemClick(itemId: string) {
+    switch (itemId) {
+      case 'large-icons':
+        this.desktopIconService.setIconSize('large');
+        break;
+      case 'medium-icons':
+        this.desktopIconService.setIconSize('medium');
+        break;
+      case 'small-icons':
+        this.desktopIconService.setIconSize('small');
+        break;
+      case 'change-background':
+        this.backgroundService.changeToRandomBackground();
+        break;
+    }
+    this.showMenu = false;
+  }
+
+  // Uygulama açma işlemleri
   openApplication(icon: DesktopIcon) {
     // GitHub ve LinkedIn için yeni sekmede aç
     if (icon.name === 'GitHub' || icon.name === 'LinkedIn') {
@@ -360,55 +284,41 @@ export class DesktopComponent {
       y,
       width: 1000,
       height: 600,
-      zIndex: this.getNextZIndex(),
+      zIndex: this.windowManager.getNextZIndex(),
       isMinimized: false,
       isMaximized: false,
       url: icon.url,
     };
 
-    this.activeWindows.push(windowObj);
-    this.focusWindow(windowObj.id);
+    this.windowManager.openWindow(windowObj);
   }
 
+  // Pencere yönetimi işlemleri
   closeWindow(id: number) {
-    this.activeWindows = this.activeWindows.filter((w) => w.id !== id);
+    this.windowManager.closeWindow(id);
   }
 
   minimizeWindow(id: number) {
-    const window = this.activeWindows.find((w) => w.id === id);
-    if (window) {
-      window.isMinimized = true;
-      // Window component'ini bul ve minimize et
-      const windowComponent = this.windowComponents.find(
-        (_, index) => this.activeWindows[index].id === id
-      );
-      if (windowComponent) {
-        windowComponent.onMinimize();
-      }
+    this.windowManager.minimizeWindow(id);
+    // Window component'ini bul ve minimize et
+    const windowComponent = this.windowComponents.find(
+      (_, index) => this.activeWindows[index].id === id
+    );
+    if (windowComponent) {
+      windowComponent.onMinimize();
     }
   }
 
   maximizeWindow(id: number) {
-    const window = this.activeWindows.find((w) => w.id === id);
-    if (window) {
-      window.isMaximized = !window.isMaximized;
-    }
+    this.windowManager.maximizeWindow(id);
   }
 
   focusWindow(id: number) {
-    const maxZIndex = Math.max(...this.activeWindows.map((w) => w.zIndex));
-    const window = this.activeWindows.find((w) => w.id === id);
-    if (window) {
-      window.zIndex = maxZIndex + 1;
-    }
+    this.windowManager.focusWindow(id);
   }
 
   updateWindowPosition(id: number, position: { x: number; y: number }) {
-    const window = this.activeWindows.find((w) => w.id === id);
-    if (window) {
-      window.x = position.x;
-      window.y = position.y;
-    }
+    this.windowManager.updateWindowPosition(id, position);
   }
 
   restoreWindow(id: number) {
@@ -416,19 +326,12 @@ export class DesktopComponent {
     if (window) {
       // Eğer pencere minimize değilse, minimize et
       if (!window.isMinimized) {
-        window.isMinimized = true;
-        // Window component'ini bul ve minimize et
-        const windowComponent = this.windowComponents.find(
-          (_, index) => this.activeWindows[index].id === id
-        );
-        if (windowComponent) {
-          windowComponent.onMinimize();
-        }
+        this.minimizeWindow(id);
         return;
       }
 
       // Eğer pencere minimize ise, restore et
-      window.isMinimized = false;
+      this.windowManager.restoreWindow(id);
 
       // Window component'ini bul ve restore metodunu çağır
       const windowComponent = this.windowComponents.find(
@@ -437,22 +340,10 @@ export class DesktopComponent {
       if (windowComponent) {
         windowComponent.restore();
       }
-
-      this.focusWindow(id);
     }
   }
 
-  getTaskbarWindows() {
-    return this.activeWindows.map((w) => ({
-      id: w.id,
-      title: w.title,
-      icon: w.icon,
-      isActive:
-        w.zIndex === Math.max(...this.activeWindows.map((w) => w.zIndex)),
-      isMinimized: w.isMinimized,
-    }));
-  }
-
+  // Start menüsü işlemleri
   toggleStartMenu() {
     this.isStartMenuOpen = !this.isStartMenuOpen;
   }
@@ -482,140 +373,43 @@ export class DesktopComponent {
     }
   }
 
-  getNextZIndex(): number {
-    return this.activeWindows.length + 1;
-  }
-
-  onRightClick(event: MouseEvent) {
-    event.preventDefault();
-
-    this.showMenu = true;
-    this.isStartMenuOpen = false;
-    this.menuPosition.x = event.clientX;
-    this.menuPosition.y = event.clientY;
-  }
-
-  menuItemClick(item: string) {
-    if (item === 'large-icons') {
-      this.iconSize = 'large';
-      localStorage.setItem('icon-size', 'large');
-    } else if (item === 'medium-icons') {
-      this.iconSize = 'medium';
-      localStorage.setItem('icon-size', 'medium');
-    } else if (item === 'small-icons') {
-      this.iconSize = 'small';
-      localStorage.setItem('icon-size', 'small');
-    } else if (item === 'change-background') {
-      let newBackground: string;
-      do {
-        const randomIndex = Math.floor(Math.random() * this.backgrounds.length);
-        newBackground = this.backgrounds[randomIndex];
-      } while (newBackground === this.background);
-      this.background = newBackground;
-      localStorage.setItem('background', this.background);
-    }
-
-    this.showMenu = false;
-  }
-
+  // Terminal özel işlemleri
   closeTerminal() {
     const terminalWindow = this.activeWindows.find(
       (w) => w.title === 'Terminal'
     );
     if (terminalWindow) {
-      const index = this.activeWindows.indexOf(terminalWindow);
-      if (index > -1) {
-        this.activeWindows.splice(index, 1);
-      }
+      this.windowManager.closeWindow(terminalWindow.id);
     }
   }
 
+  // Sistem işlemleri
   onShutDown() {
     this.router.navigate(['/shutdown']);
   }
 
+  // Yardım penceresi işlemleri
   openHelpWindow() {
-    if (this.openHelpWindows.length > 0) {
-      return;
-    }
-
-    const helpWindow: HelpWindow = {
-      id: 'help',
-      title: 'Help',
-      icon: '/icons/help.png',
-      content: `
-        <div class="p-4">
-          <h2 class="text-xl font-bold mb-4">Welcome to aheOS Help</h2>
-          
-          <div class="mb-4">
-            <h3 class="font-bold mb-2 text-sm">Getting Started</h3>
-            <ul class="list-disc pl-4 text-[12px]">
-              <li>Click the Start button to access programs and settings</li>
-              <li>Use the taskbar to switch between open windows</li>
-              <li>Right-click on the desktop for quick actions</li>
-            </ul>
-          </div>
-
-          <div class="mb-4">
-            <h3 class="font-bold text-sm mb-2">Available Applications</h3>
-            <ul class="list-disc pl-4 text-[12px]">
-              <li><b>Terminal:</b> Command-line interface</li>
-              <li><b>Notepad:</b> Text editor with your information</li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 class="font-bold text-sm mb-2">Tips</h3>
-            <ul class="list-disc pl-4 text-[12px]">
-              <li>Windows can be dragged by their title bars</li>
-              <li>Use the minimize button to hide windows</li>
-              <li>Click "Shut Down" in the Start menu to exit</li>
-            </ul>
-          </div>
-        </div>
-      `,
-      width: 400,
-      height: 500,
-      isResizable: true,
-      isMaximized: false,
-      position: { x: 150, y: 50 },
-      zIndex: this.getNextZIndex(),
-    };
-
-    this.openHelpWindows.push(helpWindow);
+    this.helpWindowService.openHelpWindow(this.windowManager.getNextZIndex());
   }
 
   closeHelpWindow(id: string) {
-    this.openHelpWindows = this.openHelpWindows.filter((w) => w.id !== id);
+    this.helpWindowService.closeHelpWindow(id);
   }
 
   minimizeHelpWindow(id: string) {
-    const helpWindow = this.openHelpWindows.find((w) => w.id === id);
-    if (helpWindow) {
-      helpWindow.isMaximized = false;
-    }
+    this.helpWindowService.minimizeHelpWindow(id);
   }
 
   maximizeHelpWindow(id: string) {
-    const helpWindow = this.openHelpWindows.find((w) => w.id === id);
-    if (helpWindow) {
-      helpWindow.isMaximized = !helpWindow.isMaximized;
-    }
+    this.helpWindowService.maximizeHelpWindow(id);
   }
 
   updateHelpWindowPosition(id: string, position: { x: number; y: number }) {
-    const helpWindow = this.openHelpWindows.find((w) => w.id === id);
-    if (helpWindow) {
-      helpWindow.position.x = position.x;
-      helpWindow.position.y = position.y;
-    }
+    this.helpWindowService.updateHelpWindowPosition(id, position);
   }
 
   focusHelpWindow(id: string) {
-    const maxZIndex = Math.max(...this.openHelpWindows.map((w) => w.zIndex));
-    const helpWindow = this.openHelpWindows.find((w) => w.id === id);
-    if (helpWindow) {
-      helpWindow.zIndex = maxZIndex + 1;
-    }
+    this.helpWindowService.focusHelpWindow(id);
   }
 }
