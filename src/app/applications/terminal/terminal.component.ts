@@ -100,7 +100,7 @@ export class TerminalComponent implements AfterViewInit {
     '',
     '           I ♥ Open Source',
     '',
-    '    Operating System [Version 1.0.2]',
+    '    Operating System [Version 1.0.3]',
     '    Developed by Ahmet Hakan Eroğlu',
     '    GitHub: github.com/aheroglu',
     '    LinkedIn: linkedin.com/in/aheroglu',
@@ -223,7 +223,7 @@ export class TerminalComponent implements AfterViewInit {
           break;
 
         case 'ver':
-          this.outputLines.push('aheOS [Version 1.0.2]');
+          this.outputLines.push('aheOS [Version 1.0.3]');
           break;
 
         case 'about':

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WindowService } from '../../services/window.service';
+import { WindowManagerService } from '../../services/window-manager.service';
 
 interface ProgramItem {
   id: number;
@@ -103,7 +104,7 @@ export class ProgramsComponent {
 
   selectedProgram: ProgramItem | null = null;
 
-  constructor() {}
+  constructor(private windowManagerService: WindowManagerService) {}
 
   selectProgram(program: ProgramItem): void {
     this.selectedProgram = program;
@@ -111,7 +112,28 @@ export class ProgramsComponent {
 
   openProgram(program: ProgramItem): void {
     if (program.type === 'web') {
-      window.open(program.url, '_blank');
+      // Pencere pozisyonunu ayarla
+      const x = 100 + Math.floor(Math.random() * 50);
+      const y = 50 + Math.floor(Math.random() * 30);
+      
+      // Pencere nesnesini oluştur
+      const windowObj = {
+        id: Date.now(),
+        title: program.name,
+        icon: program.icon,
+        type: 'web' as 'web', // Tip güvenliği için as kullanıyoruz
+        x,
+        y,
+        width: 1000,
+        height: 600,
+        zIndex: this.windowManagerService.getNextZIndex(),
+        isMinimized: false,
+        isMaximized: false,
+        url: program.url,
+      };
+      
+      // Pencereyi aç
+      this.windowManagerService.openWindow(windowObj);
     }
   }
 }
