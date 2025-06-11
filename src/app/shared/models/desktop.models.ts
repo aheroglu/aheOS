@@ -2,7 +2,7 @@ export interface DesktopIcon {
   id: number;
   name: string;
   icon: string;
-  appType: 'terminal' | 'notepad' | 'computer' | 'web' | 'programs';
+  appType: 'terminal' | 'notepad' | 'computer' | 'web' | 'programs' | 'mail' | 'certificates';
   isSelected: boolean;
   url?: string;
 }
@@ -11,7 +11,7 @@ export interface Window {
   id: number;
   title: string;
   icon: string;
-  type: 'terminal' | 'notepad' | 'computer' | 'web' | 'programs';
+  type: 'terminal' | 'notepad' | 'computer' | 'web' | 'programs' | 'mail' | 'certificates' | 'certificate';
   x: number;
   y: number;
   width: number;
@@ -20,6 +20,10 @@ export interface Window {
   isMinimized: boolean;
   isMaximized: boolean;
   url?: string;
+  content?: {
+    component: string;
+    data: any;
+  };
 }
 
 export interface HelpWindow {

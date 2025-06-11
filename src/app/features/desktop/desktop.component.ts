@@ -7,6 +7,9 @@ import { NotepadComponent } from '../../applications/notepad/notepad.component';
 import { BrowserComponent } from '../../applications/browser/browser.component';
 import { ComputerComponent } from '../../applications/computer/computer.component';
 import { ProgramsComponent } from '../../applications/programs/programs.component';
+import { MailComponent } from '../../applications/mail/mail.component';
+import { CertificatesComponent } from '../../applications/certificates/certificates.component';
+import { CertificateViewerComponent } from '../../applications/certificates/certificate-viewer.component';
 import { CommonModule } from '@angular/common';
 import { StartMenuComponent } from '../../shared/components/start-menu/start-menu.component';
 import { WindowService } from '../../services/window.service';
@@ -39,6 +42,9 @@ import {
     ProgramsComponent,
     StartMenuComponent,
     ContextMenuComponent,
+    MailComponent,
+    CertificatesComponent,
+    CertificateViewerComponent,
   ],
   template: `
     <div
@@ -99,6 +105,13 @@ import {
               <app-browser *ngSwitchCase="'web'" [url]="window.url || ''" />
               <app-computer *ngSwitchCase="'computer'" />
               <app-programs *ngSwitchCase="'programs'" />
+              <app-mail *ngSwitchCase="'mail'" />
+              <app-certificates *ngSwitchCase="'certificates'" />
+              <app-certificate-viewer 
+                *ngSwitchCase="'certificate'" 
+                [imagePath]="window.content?.data?.imagePath || ''" 
+                [name]="window.content?.data?.name || ''" 
+              />
             </ng-container>
           </div>
         </app-window>

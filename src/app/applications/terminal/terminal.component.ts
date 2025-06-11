@@ -100,7 +100,7 @@ export class TerminalComponent implements AfterViewInit {
     '',
     '           I ♥ Open Source',
     '',
-    '    Operating System [Version 1.0.3]',
+    '    Operating System [Version 1.0.4]',
     '    Developed by Ahmet Hakan Eroğlu',
     '    GitHub: github.com/aheroglu',
     '    LinkedIn: linkedin.com/in/aheroglu',
@@ -111,7 +111,7 @@ export class TerminalComponent implements AfterViewInit {
 
   private readonly socialLinks: Record<string, string> = {
     github: 'https://github.com/aheroglu',
-    linkedin: 'https://linkedin.com/in/aheroglu'
+    linkedin: 'https://linkedin.com/in/aheroglu',
   };
 
   private readonly availableCommands = [
@@ -183,8 +183,10 @@ export class TerminalComponent implements AfterViewInit {
         } else if (args[1] === '--help') {
           this.outputLines.push('Available platforms:');
           this.outputLines.push('');
-          Object.keys(this.socialLinks).forEach(platform => {
-            this.outputLines.push(`${platform.padEnd(10)} - Opens ${this.socialLinks[platform]}`);
+          Object.keys(this.socialLinks).forEach((platform) => {
+            this.outputLines.push(
+              `${platform.padEnd(10)} - Opens ${this.socialLinks[platform]}`
+            );
           });
         } else {
           const platform = args[1];
@@ -193,7 +195,9 @@ export class TerminalComponent implements AfterViewInit {
             this.outputLines.push(`Opening ${platform} in a new tab...`);
           } else {
             this.outputLines.push(`Error: Unknown platform "${platform}"`);
-            this.outputLines.push('Use "open --help" to see available platforms');
+            this.outputLines.push(
+              'Use "open --help" to see available platforms'
+            );
           }
         }
         this.currentCommand = '';
@@ -223,7 +227,7 @@ export class TerminalComponent implements AfterViewInit {
           break;
 
         case 'ver':
-          this.outputLines.push('aheOS [Version 1.0.3]');
+          this.outputLines.push('aheOS [Version 1.0.4]');
           break;
 
         case 'about':

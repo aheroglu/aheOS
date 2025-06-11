@@ -40,6 +40,20 @@ export class DesktopIconService {
     },
     {
       id: 5,
+      name: 'Certificates',
+      icon: '/icons/certificate.png',
+      appType: 'certificates',
+      isSelected: false,
+    },
+    // {
+    //   id: 6,
+    //   name: 'Mail',
+    //   icon: '/icons/mail.png',
+    //   appType: 'mail',
+    //   isSelected: false,
+    // },
+    {
+      id: 7,
       name: 'GitHub',
       icon: '/icons/github.png',
       appType: 'web',
@@ -47,7 +61,7 @@ export class DesktopIconService {
       url: 'https://github.com/aheroglu',
     },
     {
-      id: 6,
+      id: 8,
       name: 'LinkedIn',
       icon: '/icons/linkedin.png',
       appType: 'web',
